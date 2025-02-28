@@ -41,14 +41,15 @@ def compute_metrics(eval_pred):
 # Create TrainingArguments
 training_args = TrainingArguments(
     output_dir="./results",          # Output directory
-    num_train_epochs=5,              # Total number of training epochs
+    num_train_epochs=1,              # Total number of training epochs
     per_device_train_batch_size=8,  # Batch size per device during training
+    gradient_accumulation_steps=100,
     per_device_eval_batch_size=64,   # Batch size for evaluation
     warmup_ratio=0.1,                # Number of warmup steps for learning rate scheduler
     learning_rate=5e-5,
     weight_decay=0.01,               # Strength of weight decay
     logging_dir="./logs",            # Directory for storing logs
-    logging_steps=10,
+    logging_steps=100,
     eval_strategy="steps",
     save_strategy="steps",
     save_steps=500,
@@ -56,7 +57,8 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model="accuracy",
     report_to="wandb",
-    bf16=True
+    disable_tqdm=True,
+    bf16=True,
 )
 
 # Create Trainer instance
@@ -65,8 +67,9 @@ trainer = CustomTrainer(
     args=training_args,                  # Training arguments, defined above
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
+    
     compute_metrics=compute_metrics,
-    callbacks=[EarlyStoppingCallback(early_stopping_patience=5)],  # Stop if no improvement in 5 evaluations
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],  # Stop if no improvement in 5 evaluations
 )
 
 # Train the model
