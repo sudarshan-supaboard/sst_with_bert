@@ -1,0 +1,20 @@
+datasets
+bitsandbytes
+kagglehub
+ipykernel==5.5.6
+numpy==1.26.4
+pandas==2.2.3
+matplotlib==3.7.5
+scipy==1.13.1
+seaborn==0.12.2
+scikit-learn==1.2.2
+transformers==4.47.0
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+torchmetrics==1.5.1
+xgboost==2.0.3
+mysql-connector-python
+emoji==0.6.0
+
+# pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
