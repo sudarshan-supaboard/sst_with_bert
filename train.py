@@ -5,8 +5,9 @@ import evaluate
 
 from transformers import Trainer
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
-from model import model, tokenized_datasets
 from pprint import pprint
+
+from model import model, tokenized_datasets
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
