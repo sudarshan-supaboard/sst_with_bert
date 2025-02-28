@@ -58,7 +58,6 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model="accuracy",
     report_to="wandb",
-    disable_tqdm=True,
     bf16=True,
 )
 
