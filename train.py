@@ -50,7 +50,7 @@ training_args = TrainingArguments(
     learning_rate=5e-5,
     weight_decay=0.01,               # Strength of weight decay
     logging_dir="./logs",            # Directory for storing logs
-    logging_steps=100,
+    logging_steps=10,
     eval_strategy="steps",
     save_strategy="steps",
     save_steps=500,
@@ -68,7 +68,6 @@ trainer = CustomTrainer(
     args=training_args,                  # Training arguments, defined above
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
-    
     compute_metrics=compute_metrics,
     callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],  # Stop if no improvement in 5 evaluations
 )
