@@ -28,7 +28,7 @@ model = BertForSequenceClassification.from_pretrained(model_path,
                                                       problem_type="multi_label_classification",
                                                       ignore_mismatched_sizes=True,
                                                       num_labels=len(idx_to_labels),
-                                                      device_map=get_device(),
+                                                      device_map="auto",
                                                       torch_dtype=torch.bfloat16
                                                       )
 
