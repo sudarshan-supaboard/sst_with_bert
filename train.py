@@ -12,7 +12,7 @@ from model import model, tokenized_datasets
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
-        device = model.modules.device
+        device = model.device
         labels = inputs.pop("labels")
         labels = labels.to(device)
 
