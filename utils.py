@@ -35,3 +35,6 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
                     control.should_training_stop = True
                     print("\nEarly stopping triggered due to no improvement in training loss!")
 
+
+if __name__ == '__main__':
+    print(f'Device: {get_device()}')
