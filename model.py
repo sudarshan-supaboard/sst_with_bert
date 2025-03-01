@@ -5,7 +5,6 @@ from transformers import BertTokenizer, BertForSequenceClassification
 from dotenv import load_dotenv
 from huggingface_hub import login as hf_login
 from wandb import login as wandb_login
-
 from preprocess import idx_to_labels, dataset, labels_to_idx
 from utils import get_device
 

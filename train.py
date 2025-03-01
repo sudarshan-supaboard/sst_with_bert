@@ -4,11 +4,10 @@ import torch.nn.functional as F
 import evaluate
 
 from transformers import Trainer
-from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
-from transformers import TrainerCallback
+from transformers import Trainer, TrainingArguments
 
 from pprint import pprint
-
+from utils import EarlyStoppingTrainingLossCallback
 from model import model, tokenized_datasets
 
 class CustomTrainer(Trainer):
@@ -40,30 +39,6 @@ def compute_metrics(eval_pred):
         "accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"], # type: ignore
         "f1": f1.compute(predictions=predictions, references=labels, average='weighted')["f1"], # type: ignore
     }
-
-
-class EarlyStoppingTrainingLossCallback(TrainerCallback):
-    def __init__(self, patience=3, min_delta=0.001):
-        self.patience = patience
-        self.min_delta = min_delta
-        self.best_loss = float('inf')
-        self.counter = 0
-
-    def on_step_end(self, args, state, control, **kwargs):
-        """Called at the end of every step to monitor training loss."""
-        if state.log_history:
-            train_losses = [log["loss"] for log in state.log_history if "loss" in log]
-            if train_losses:
-                current_loss = train_losses[-1]  # Get the most recent training loss
-                if current_loss < self.best_loss - self.min_delta:
-                    self.best_loss = current_loss
-                    self.counter = 0  # Reset patience counter if loss improves
-                else:
-                    self.counter += 1  # Increment counter if no improvement
-
-                if self.counter >= self.patience:
-                    control.should_training_stop = True
-                    print("Early stopping triggered due to no improvement in training loss!")
 
 
 # Create TrainingArguments
@@ -104,5 +79,5 @@ trainer.train()
 prediction_outputs = trainer.predict(test_dataset=tokenized_datasets['test'])
 
 print("predictions")
-pprint(prediction_outputs)
+pprint(prediction_outputs.metrics)
 
