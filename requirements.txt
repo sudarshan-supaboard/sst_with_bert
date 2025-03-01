@@ -6,3 +6,4 @@ kagglehub
 evaluate
 wandb
 dotenv
+google-cloud-storage

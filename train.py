@@ -7,7 +7,7 @@ from transformers import Trainer
 from transformers import Trainer, TrainingArguments
 
 from pprint import pprint
-from utils import EarlyStoppingTrainingLossCallback
+from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback
 from model import model, tokenized_datasets
 
 class CustomTrainer(Trainer):
@@ -40,10 +40,10 @@ def compute_metrics(eval_pred):
         "f1": f1.compute(predictions=predictions, references=labels, average='weighted')["f1"], # type: ignore
     }
 
-output_dir = "gs://pleasedontbankrupt/results"
+
 # Create TrainingArguments
 training_args = TrainingArguments(
-    output_dir=output_dir,          # Output directory
+    output_dir="checkpoints",          # Output directory
     num_train_epochs=1,              # Total number of training epochs
     per_device_train_batch_size=8,  # Batch size per device during training
     gradient_accumulation_steps=2,
@@ -55,6 +55,7 @@ training_args = TrainingArguments(
     logging_steps=1,
     eval_strategy="steps",
     save_strategy="steps",
+    save_total_limit=3,
     save_steps=10,
     eval_steps=10,
     load_best_model_at_end=True,
@@ -69,14 +70,15 @@ trainer = CustomTrainer(
     args=training_args,                  # Training arguments, defined above
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
+    
     compute_metrics=compute_metrics,
-    callbacks=[EarlyStoppingTrainingLossCallback()],  # Stop if no improvement in 5 evaluations
+    callbacks=[EarlyStoppingTrainingLossCallback(), GCSUploadCallback(bucket_name="pleasedontbankrupt")],  # Stop if no improvement in 5 evaluations
 )
 
 # Train the model
 trainer.train()
 
-prediction_outputs = trainer.predict(test_dataset=tokenized_datasets['test'])
+prediction_outputs = trainer.predict(test_dataset=tokenized_datasets['test']) # type: ignore
 
 print("predictions")
 pprint(prediction_outputs.metrics)
