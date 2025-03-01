@@ -40,10 +40,10 @@ def compute_metrics(eval_pred):
         "f1": f1.compute(predictions=predictions, references=labels, average='weighted')["f1"], # type: ignore
     }
 
-
+output_dir = "gs://pleasedontbankrupt/results"
 # Create TrainingArguments
 training_args = TrainingArguments(
-    output_dir="./results",          # Output directory
+    output_dir=output_dir,          # Output directory
     num_train_epochs=1,              # Total number of training epochs
     per_device_train_batch_size=8,  # Batch size per device during training
     gradient_accumulation_steps=2,
