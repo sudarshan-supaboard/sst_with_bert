@@ -72,7 +72,7 @@ trainer = CustomTrainer(
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     
     compute_metrics=compute_metrics,
-    callbacks=[EarlyStoppingTrainingLossCallback(), GCSUploadCallback(bucket_name="pleasedontbankrupt")],  # Stop if no improvement in 5 evaluations
+    callbacks=[EarlyStoppingTrainingLossCallback()],  # Stop if no improvement in 5 evaluations
 )
 
 # Train the model
