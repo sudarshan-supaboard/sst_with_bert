@@ -25,6 +25,7 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
         print(f"Running Early Stop Callback")
         if state.log_history:
             val_losses = [log["eval_loss"] for log in state.log_history if "eval_loss" in log]
+            print(f'Validation losses: {val_losses}')
             if val_losses:
                 current_loss = val_losses[-1]  # Get the most recent training loss
                 if current_loss < self.best_loss - self.min_delta:
