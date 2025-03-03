@@ -76,7 +76,7 @@ trainer = CustomTrainer(
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     compute_metrics=compute_metrics,
-    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 5 evaluations
+    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 3 evaluations
 )
 
 # Train the model

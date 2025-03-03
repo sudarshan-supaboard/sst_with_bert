@@ -22,6 +22,7 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
 
     def on_save(self, args, state, control, **kwargs):
         """Called at the end of every step to monitor training loss."""
+        print(f"Running Early Stop Callback")
         if state.log_history:
             val_losses = [log["eval_loss"] for log in state.log_history if "eval_loss" in log]
             if val_losses:
@@ -34,7 +35,7 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
 
                 if self.counter >= self.patience:
                     control.should_training_stop = True
-                    print("\nEarly stopping triggered due to no improvement in training loss!")
+                    print("\nEarly stopping triggered due to no improvement in validation loss!")
 
 
 
