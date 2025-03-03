@@ -66,7 +66,7 @@ training_args = TrainingArguments(
     bf16=True,
 )
 
-es_callback = EarlyStoppingTrainingLossCallback()
+es_callback = EarlyStoppingTrainingLossCallback(patience=3)
 gcs_callback = GCSUploadCallback()
 
 # Create Trainer instance
@@ -76,7 +76,7 @@ trainer = CustomTrainer(
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     compute_metrics=compute_metrics,
-    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 3 evaluations
+    callbacks=[es_callback],  # Stop if no improvement in 3 evaluations
 )
 
 # Train the model

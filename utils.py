@@ -14,7 +14,7 @@ def get_device():
     return device
 
 class EarlyStoppingTrainingLossCallback(TrainerCallback):
-    def __init__(self, patience=3, min_delta=0.001):
+    def __init__(self, patience=3, min_delta=0.01):
         self.patience = patience
         self.min_delta = min_delta
         self.best_loss = float('inf')
