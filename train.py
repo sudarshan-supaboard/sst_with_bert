@@ -10,6 +10,8 @@ from pprint import pprint
 from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback
 from model import model, tokenized_datasets
 
+from config import Config
+
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         device = model.module.device
@@ -43,7 +45,7 @@ def compute_metrics(eval_pred):
 
 # Create TrainingArguments
 training_args = TrainingArguments(
-    output_dir="checkpoints",          # Output directory
+    output_dir=Config.OUTPUT_DIR,          # Output directory
     num_train_epochs=1,              # Total number of training epochs
     per_device_train_batch_size=8,  # Batch size per device during training
     gradient_accumulation_steps=2,
@@ -64,15 +66,17 @@ training_args = TrainingArguments(
     bf16=True,
 )
 
+es_callback = EarlyStoppingTrainingLossCallback()
+gcs_callback = GCSUploadCallback()
+
 # Create Trainer instance
 trainer = CustomTrainer(
     model=model,                         # The instantiated 🤗 Transformers model to be trained
     args=training_args,                  # Training arguments, defined above
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
-    
     compute_metrics=compute_metrics,
-    callbacks=[EarlyStoppingTrainingLossCallback()],  # Stop if no improvement in 5 evaluations
+    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 5 evaluations
 )
 
 # Train the model

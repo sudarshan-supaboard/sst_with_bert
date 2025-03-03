@@ -1,9 +1,9 @@
 import torch
 import gc
-import os
-
+import shutil
 from transformers import TrainerCallback
 from google.cloud import storage
+from config import Config
 
 def clear_cache():
   torch.cuda.empty_cache()  # Free unused memory
@@ -12,9 +12,6 @@ def clear_cache():
 def get_device():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     return device
-
-def get_checkpoints_dir():
-    return "./checkpoints"
 
 class EarlyStoppingTrainingLossCallback(TrainerCallback):
     def __init__(self, patience=3, min_delta=0.001):
@@ -26,9 +23,9 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
     def on_save(self, args, state, control, **kwargs):
         """Called at the end of every step to monitor training loss."""
         if state.log_history:
-            train_losses = [log["loss"] for log in state.log_history if "loss" in log]
-            if train_losses:
-                current_loss = train_losses[-1]  # Get the most recent training loss
+            val_losses = [log["eval_loss"] for log in state.log_history if "eval_loss" in log]
+            if val_losses:
+                current_loss = val_losses[-1]  # Get the most recent training loss
                 if current_loss < self.best_loss - self.min_delta:
                     self.best_loss = current_loss
                     self.counter = 0  # Reset patience counter if loss improves
@@ -42,43 +39,31 @@ class EarlyStoppingTrainingLossCallback(TrainerCallback):
 
 
 class GCSUploadCallback(TrainerCallback):
-    def __init__(self, bucket_name, checkpoint_dir="checkpoints"):
+    def __init__(self, bucket_name=Config.BUCKET_NAME, checkpoint_dir=Config.OUTPUT_DIR):
         self.bucket_name = bucket_name
         self.checkpoint_dir = checkpoint_dir  # Local directory where checkpoints are saved
-        self.storage_client = storage.Client(project="true-sprite-412217")  # Initialize Google Cloud Storage client
+        self.storage_client = storage.Client(project=Config.PROJECT_ID)
         self.bucket = self.storage_client.bucket(bucket_name)
 
-    def upload_to_gcs(self, local_path, gcs_path):
+    def upload_to_gcs(self, local_path):
         """Uploads a file or directory to GCS recursively."""
-        if os.path.isdir(local_path):  # Upload directory
-            for root, _, files in os.walk(local_path):
-                for file in files:
-                    local_file = os.path.join(root, file)
-                    relative_path = os.path.relpath(local_file, local_path)
-                    blob_path = os.path.join(gcs_path, relative_path)
-                    
-                    blob = self.bucket.blob(blob_path)
-                    blob.upload_from_filename(local_file)
-                    print(f"Uploaded {local_file} to gs://{self.bucket_name}/{blob_path}")
-                    
-        else:  # Upload single file
-            blob = self.bucket.blob(gcs_path)
-            blob.upload_from_filename(local_path)
-            print(f"Uploaded {local_path} to gs://{self.bucket_name}/{gcs_path}")
-            
+        zip_file = f"{local_path}.zip"
+        shutil.make_archive(local_path, 'zip', local_path)
+        print(f"Zipped {local_path} -> {zip_file}")
+        
+        blob = self.bucket.blob(zip_file)
+        blob.upload_from_filename(zip_file)
+        print(f"Uploaded {local_path} to gs://{self.bucket_name}/{zip_file}")
+        
+        return zip_file
+        
     def on_save(self, args, state, control, **kwargs):
         """Triggered whenever a checkpoint is saved."""
         print("Saving checkpoint, uploading to GCS...")
         
-        # Define the GCS destination path
-        gcs_path = f"{self.checkpoint_dir}/{state.global_step}/"
-        
         # Upload the entire checkpoint directory
-        self.upload_to_gcs(self.checkpoint_dir, gcs_path)
+        uploaded_file = self.upload_to_gcs(self.checkpoint_dir)
 
-        print(f"Checkpoint uploaded to gs://{self.bucket_name}/{gcs_path}")
+        print(f"Checkpoint uploaded to gs://{self.bucket_name}/{uploaded_file}")
 
 
-
-if __name__ == '__main__':
-    print(f'Device: {get_device()}')
