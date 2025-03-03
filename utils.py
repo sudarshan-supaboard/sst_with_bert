@@ -1,6 +1,8 @@
 import torch
 import gc
 import shutil
+import os
+
 from transformers import TrainerCallback
 from google.cloud import storage
 from config import Config
@@ -81,4 +83,5 @@ class GCSUploadCallback(TrainerCallback):
 
         print(f"Checkpoint uploaded to gs://{self.bucket_name}/{uploaded_file}")
 
+        print(os.listdir('checkpoints'))
 

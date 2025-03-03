@@ -63,7 +63,7 @@ training_args = TrainingArguments(
     save_steps=10,
     eval_steps=10,
     load_best_model_at_end=True,
-    metric_for_best_model="eval_f1",
+    metric_for_best_model="f1",
     greater_is_better=True,
     report_to="wandb",
     bf16=True,
@@ -79,7 +79,7 @@ trainer = CustomTrainer(
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     compute_metrics=compute_metrics,
-    callbacks=[es_callback],  # Stop if no improvement in 3 evaluations
+    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 3 evaluations
 )
 
 # Train the model
