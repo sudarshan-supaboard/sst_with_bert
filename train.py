@@ -63,8 +63,8 @@ training_args = TrainingArguments(
     save_steps=10,
     eval_steps=10,
     load_best_model_at_end=True,
-    metric_for_best_model="eval_loss",
-    greater_is_better=False,
+    metric_for_best_model="eval_f1",
+    greater_is_better=True,
     report_to="wandb",
     bf16=True,
 )
@@ -96,4 +96,5 @@ def save_best_model():
         json.dump(obj={"checkpoint": best_checkpoint}, fp=f)
     print(f'Best Checkpoint: {best_checkpoint} Saved.')
 
+save_best_model()
 upload_checkpoints()
