@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 import evaluate
+import json
 
 from transformers import Trainer
 from transformers import Trainer, TrainingArguments
@@ -9,6 +10,7 @@ from transformers import Trainer, TrainingArguments
 from pprint import pprint
 from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback
 from model import model, tokenized_datasets
+from utils import upload_checkpoints
 
 from config import Config
 
@@ -61,7 +63,8 @@ training_args = TrainingArguments(
     save_steps=10,
     eval_steps=10,
     load_best_model_at_end=True,
-    metric_for_best_model="accuracy",
+    metric_for_best_model="eval_loss",
+    greater_is_better=False,
     report_to="wandb",
     bf16=True,
 )
@@ -83,7 +86,14 @@ trainer = CustomTrainer(
 trainer.train()
 
 prediction_outputs = trainer.predict(test_dataset=tokenized_datasets['test']) # type: ignore
+best_checkpoint = trainer.state.best_model_checkpoint
 
 print("predictions")
 pprint(prediction_outputs.metrics)
 
+def save_best_model():
+    with open("best_checkpoint.json", "w") as f:
+        json.dump(obj={"checkpoint": best_checkpoint}, fp=f)
+    print(f'Best Checkpoint: {best_checkpoint} Saved.')
+
+upload_checkpoints()

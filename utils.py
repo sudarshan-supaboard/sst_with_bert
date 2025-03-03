@@ -13,6 +13,19 @@ def get_device():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     return device
 
+def upload_checkpoints():
+    storage_client = storage.Client(project=Config.PROJECT_ID)
+    bucket = storage_client.bucket(Config.BUCKET_NAME)
+    
+    zip_file = f"{Config.OUTPUT_DIR}.zip"
+    shutil.make_archive(Config.OUTPUT_DIR, 'zip', Config.OUTPUT_DIR)
+    print(f"Zipped {Config.OUTPUT_DIR} -> {zip_file}")
+        
+    blob = bucket.blob(zip_file)
+    blob.upload_from_filename(zip_file)
+    print(f"Uploaded {Config.OUTPUT_DIR} to gs://{Config.OUTPUT_DIR}/{zip_file}")
+    
+
 class EarlyStoppingTrainingLossCallback(TrainerCallback):
     def __init__(self, patience=3, min_delta=0.01):
         self.patience = patience

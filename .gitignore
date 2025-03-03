@@ -3,7 +3,7 @@
 /**/.boto
 /**/*.zip
 
-
+*.zip
 wandb
 results
 checkpoints
