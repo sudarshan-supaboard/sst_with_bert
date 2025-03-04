@@ -11,10 +11,6 @@ def clear_cache():
   torch.cuda.empty_cache()  # Free unused memory
   gc.collect()  # Run Python garbage collector
 
-def get_device():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return device
-
 def upload_checkpoints():
     storage_client = storage.Client(project=Config.PROJECT_ID)
     bucket = storage_client.bucket(Config.BUCKET_NAME)
@@ -26,7 +22,7 @@ def upload_checkpoints():
     blob = bucket.blob(zip_file)
     blob.upload_from_filename(zip_file)
     print(f"Uploaded {Config.OUTPUT_DIR} to gs://{Config.OUTPUT_DIR}/{zip_file}")
-    
+
 
 class EarlyStoppingTrainingLossCallback(TrainerCallback):
     def __init__(self, patience=3, min_delta=0.01):
@@ -83,5 +79,4 @@ class GCSUploadCallback(TrainerCallback):
 
         print(f"Checkpoint uploaded to gs://{self.bucket_name}/{uploaded_file}")
 
-        print(os.listdir('checkpoints'))
 

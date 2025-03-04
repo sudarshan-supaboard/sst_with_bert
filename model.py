@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 from huggingface_hub import login as hf_login
 from wandb import login as wandb_login
 from preprocess import idx_to_labels, dataset, labels_to_idx
-from utils import get_device
+from peft import  LoraConfig, get_peft_model # type: ignore
+
+from config import Config
 
 load_dotenv()
 
@@ -26,20 +28,31 @@ model = BertForSequenceClassification.from_pretrained(model_path,
                                                       problem_type="multi_label_classification",
                                                       ignore_mismatched_sizes=True,
                                                       num_labels=len(idx_to_labels),
-                                                      
                                                       torch_dtype=torch.bfloat16
                                                       )
 
+lora_config = LoraConfig(
+    r=16,  # Rank of the low-rank matrices (balance between efficiency & expressiveness)
+    lora_alpha=32,  # Scaling factor to control update magnitude
+    lora_dropout=0.1,  # Dropout to prevent overfitting
+    target_modules=["query", "key", "value"],  # Apply LoRA to attention layers only
+    bias="none",  # No additional biases for stability
+    task_type="SEQ_CLS",  # Sequence classification task
+    modules_to_save=['pooler','classifier']
+)
 
-model.to(get_device()) # type: ignore
+# # Freeze all layers except the classifier
+# for param in model.parameters():
+#     param.requires_grad = False
 
-# Freeze all layers except the classifier
-for param in model.parameters():
-    param.requires_grad = False
+# # Unfreeze the classifier parameters
+# for param in model.classifier.parameters():
+#     param.requires_grad = True
 
-# Unfreeze the classifier parameters
-for param in model.classifier.parameters():
-    param.requires_grad = True
+
+model = get_peft_model(model=model, peft_config=lora_config)
+model.print_trainable_parameters()
+model.to(Config.device())
 
 for name, param in model.named_parameters():
     if param.requires_grad:

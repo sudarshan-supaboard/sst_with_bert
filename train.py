@@ -10,7 +10,6 @@ from transformers import Trainer, TrainingArguments
 from pprint import pprint
 from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback
 from model import model, tokenized_datasets
-from utils import upload_checkpoints
 
 from config import Config
 
@@ -39,6 +38,9 @@ def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=1)
 
+    pprint(logits)
+    
+    pprint(labels)
     return {
         "accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"], # type: ignore
         "f1": f1.compute(predictions=predictions, references=labels, average='weighted')["f1"], # type: ignore
@@ -47,11 +49,11 @@ def compute_metrics(eval_pred):
 
 # Create TrainingArguments
 training_args = TrainingArguments(
-    output_dir=Config.OUTPUT_DIR,          # Output directory
+    output_dir=Config.OUTPUT_DIR,    # Output directory
     num_train_epochs=1,              # Total number of training epochs
-    per_device_train_batch_size=8,  # Batch size per device during training
-    gradient_accumulation_steps=2,
-    per_device_eval_batch_size=64,   # Batch size for evaluation
+    per_device_train_batch_size=4,   # batch size per device during training
+    gradient_accumulation_steps=4,
+    per_device_eval_batch_size=64,    # Batch size for evaluation
     warmup_ratio=0.1,                # Number of warmup steps for learning rate scheduler
     learning_rate=5e-5,
     weight_decay=0.01,               # Strength of weight decay
@@ -59,7 +61,7 @@ training_args = TrainingArguments(
     logging_steps=1,
     eval_strategy="steps",
     save_strategy="steps",
-    save_total_limit=3,
+    save_total_limit=4,
     save_steps=10,
     eval_steps=10,
     load_best_model_at_end=True,
@@ -70,7 +72,7 @@ training_args = TrainingArguments(
 )
 
 es_callback = EarlyStoppingTrainingLossCallback(patience=3)
-gcs_callback = GCSUploadCallback()
+# gcs_callback = GCSUploadCallback()
 
 # Create Trainer instance
 trainer = CustomTrainer(
@@ -79,7 +81,7 @@ trainer = CustomTrainer(
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     compute_metrics=compute_metrics,
-    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 3 evaluations
+    callbacks=[es_callback],  # Stop if no improvement in 3 evaluations
 )
 
 # Train the model
@@ -97,4 +99,3 @@ def save_best_model():
     print(f'Best Checkpoint: {best_checkpoint} Saved.')
 
 save_best_model()
-upload_checkpoints()
