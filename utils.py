@@ -2,6 +2,7 @@ import torch
 import gc
 import shutil
 import os
+import GPUtil
 
 from transformers import TrainerCallback
 from google.cloud import storage
@@ -10,6 +11,19 @@ from config import Config
 def clear_cache():
   torch.cuda.empty_cache()  # Free unused memory
   gc.collect()  # Run Python garbage collector
+
+def get_memory_usage():
+    # Get all GPUs
+    gpus = GPUtil.getGPUs()
+    # Print details for each GPU
+    for gpu in gpus:
+        print(f"GPU {gpu.id}: {gpu.name}")
+        print(f"  Total Memory: {gpu.memoryTotal} MB")
+        print(f"  Used Memory: {gpu.memoryUsed} MB")
+        print(f"  Free Memory: {gpu.memoryFree} MB")
+        print(f"  GPU Utilization: {gpu.load * 100:.1f}%")
+        print("-" * 40)
+
 
 def upload_checkpoints():
     storage_client = storage.Client(project=Config.PROJECT_ID)

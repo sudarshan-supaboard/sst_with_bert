@@ -21,10 +21,8 @@ wandb_login(key=wandb_key)
 
 
 
-model_path = "nlptown/bert-base-multilingual-uncased-sentiment"
-
-tokenizer = BertTokenizer.from_pretrained(model_path, token=hf_key)
-model = BertForSequenceClassification.from_pretrained(model_path,
+tokenizer = BertTokenizer.from_pretrained(Config.MODEL_PATH, token=hf_key)
+model = BertForSequenceClassification.from_pretrained(Config.MODEL_PATH,
                                                       problem_type="multi_label_classification",
                                                       ignore_mismatched_sizes=True,
                                                       num_labels=len(idx_to_labels),
@@ -38,7 +36,7 @@ lora_config = LoraConfig(
     target_modules=["query", "key", "value"],  # Apply LoRA to attention layers only
     bias="none",  # No additional biases for stability
     task_type="SEQ_CLS",  # Sequence classification task
-    modules_to_save=['pooler','classifier']
+    modules_to_save=['classifier']
 )
 
 # # Freeze all layers except the classifier
@@ -52,11 +50,10 @@ lora_config = LoraConfig(
 
 model = get_peft_model(model=model, peft_config=lora_config)
 model.print_trainable_parameters()
-model.to(Config.device())
 
-for name, param in model.named_parameters():
-    if param.requires_grad:
-      print(f"Parameter {name}: Trainable={param.requires_grad}")
+# for name, param in model.named_parameters():
+#     if param.requires_grad:
+#       print(f"Parameter {name}: Trainable={param.requires_grad}")
 
 def tokenize_function(examples):
 

@@ -38,9 +38,6 @@ def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=1)
 
-    pprint(logits)
-    
-    pprint(labels)
     return {
         "accuracy": accuracy.compute(predictions=predictions, references=labels)["accuracy"], # type: ignore
         "f1": f1.compute(predictions=predictions, references=labels, average='weighted')["f1"], # type: ignore
@@ -72,7 +69,7 @@ training_args = TrainingArguments(
 )
 
 es_callback = EarlyStoppingTrainingLossCallback(patience=3)
-# gcs_callback = GCSUploadCallback()
+gcs_callback = GCSUploadCallback()
 
 # Create Trainer instance
 trainer = CustomTrainer(
@@ -81,7 +78,7 @@ trainer = CustomTrainer(
     train_dataset=tokenized_datasets['train'],         # Training dataset
     eval_dataset=tokenized_datasets['valid'],           # Evaluation dataset
     compute_metrics=compute_metrics,
-    callbacks=[es_callback],  # Stop if no improvement in 3 evaluations
+    callbacks=[es_callback, gcs_callback],  # Stop if no improvement in 3 evaluations
 )
 
 # Train the model
