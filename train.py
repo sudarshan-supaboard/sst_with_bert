@@ -47,7 +47,7 @@ def compute_metrics(eval_pred):
 # Create TrainingArguments
 training_args = TrainingArguments(
     output_dir=Config.OUTPUT_DIR,    # Output directory
-    num_train_epochs=3,              # Total number of training epochs
+    num_train_epochs=5,              # Total number of training epochs
     per_device_train_batch_size=8,   # batch size per device during training
     gradient_accumulation_steps=4,
     per_device_eval_batch_size=64,    # Batch size for evaluation
@@ -59,8 +59,8 @@ training_args = TrainingArguments(
     eval_strategy="steps",
     save_strategy="steps",
     save_total_limit=4,
-    save_steps=50,
-    eval_steps=50,
+    save_steps=100,
+    eval_steps=100,
     load_best_model_at_end=True,
     metric_for_best_model="f1",
     greater_is_better=True,
