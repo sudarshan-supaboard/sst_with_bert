@@ -51,7 +51,7 @@ class CustomTrainer(Trainer):
         # Example: Custom loss (Focal Loss)
         loss = F.cross_entropy(logits, labels)
 
-        get_memory_usage()
+        # get_memory_usage()
         return (loss, outputs) if return_outputs else loss
 
 
