@@ -7,7 +7,7 @@ class Config:
     DATASET_PATH="sudarshan1927/go-emotions-and-generated"
     RANDOM_STATE=42
     MODEL_PATH="nlptown/bert-base-multilingual-uncased-sentiment"
-   
+    NUM_LABELS=28
     
     @classmethod
     def device(cls):

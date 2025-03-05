@@ -5,7 +5,7 @@ from transformers import BertTokenizer, BertForSequenceClassification
 from dotenv import load_dotenv
 from huggingface_hub import login as hf_login
 from wandb import login as wandb_login
-from preprocess import idx_to_labels, dataset, labels_to_idx
+from preprocess import make_datasets
 from peft import  LoraConfig, get_peft_model # type: ignore
 
 from config import Config
@@ -25,7 +25,7 @@ tokenizer = BertTokenizer.from_pretrained(Config.MODEL_PATH, token=hf_key)
 model = BertForSequenceClassification.from_pretrained(Config.MODEL_PATH,
                                                       problem_type="multi_label_classification",
                                                       ignore_mismatched_sizes=True,
-                                                      num_labels=len(idx_to_labels),
+                                                      num_labels=Config.NUM_LABELS,
                                                       torch_dtype=torch.bfloat16
                                                       )
 
@@ -54,6 +54,7 @@ model.print_trainable_parameters()
 # for name, param in model.named_parameters():
 #     if param.requires_grad:
 #       print(f"Parameter {name}: Trainable={param.requires_grad}")
+dataset = make_datasets()
 
 def tokenize_function(examples):
 
@@ -61,7 +62,7 @@ def tokenize_function(examples):
                              truncation=True, return_tensors="pt")
 
     # convert labels to ids using labels_to_idx
-    batch_inputs['label'] = torch.tensor([labels_to_idx[l] for l in examples['label']])
+    batch_inputs['label'] = torch.tensor(examples['label'])
     # batch_inputs["label"] = torch.tensor(encoder.transform(np.array(examples['label']).reshape(-1,1)))
 
     return batch_inputs
