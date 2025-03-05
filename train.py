@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import evaluate
 import json
 import argparse
+import wandb
 
 from transformers import Trainer
 from transformers import Trainer, TrainingArguments
@@ -13,11 +14,11 @@ from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback, get_memo
 from model import model, tokenized_datasets
 from config import Config
 
-
 # Load multiple metrics
 accuracy = evaluate.load("accuracy")
 f1 = evaluate.load("f1")
 
+wandb.init(project=Config.PROJECT_NAME)
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -59,6 +60,7 @@ def train(bkt_upload=True):
 
     # Create TrainingArguments
     training_args = TrainingArguments(
+        run_name=Config.PROJECT_NAME,
         output_dir=Config.OUTPUT_DIR,  # Output directory
         num_train_epochs=5,  # Total number of training epochs
         per_device_train_batch_size=8,  # batch size per device during training

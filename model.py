@@ -39,21 +39,9 @@ lora_config = LoraConfig(
     modules_to_save=['classifier']
 )
 
-# # Freeze all layers except the classifier
-# for param in model.parameters():
-#     param.requires_grad = False
-
-# # Unfreeze the classifier parameters
-# for param in model.classifier.parameters():
-#     param.requires_grad = True
-
-
 model = get_peft_model(model=model, peft_config=lora_config)
 model.print_trainable_parameters()
 
-# for name, param in model.named_parameters():
-#     if param.requires_grad:
-#       print(f"Parameter {name}: Trainable={param.requires_grad}")
 dataset = make_datasets()
 
 def tokenize_function(examples):
@@ -63,7 +51,6 @@ def tokenize_function(examples):
 
     # convert labels to ids using labels_to_idx
     batch_inputs['label'] = torch.tensor(examples['label'])
-    # batch_inputs["label"] = torch.tensor(encoder.transform(np.array(examples['label']).reshape(-1,1)))
 
     return batch_inputs
 

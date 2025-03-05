@@ -21,7 +21,6 @@ def get_memory_usage():
         print(f"  Total Memory: {gpu.memoryTotal} MB")
         print(f"  Used Memory: {gpu.memoryUsed} MB")
         print(f"  Free Memory: {gpu.memoryFree} MB")
-        print(f"  GPU Utilization: {gpu.load * 100:.1f}%")
         print("-" * 40)
 
 

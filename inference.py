@@ -2,7 +2,7 @@ import torch
 
 from typing import List
 from transformers import BertForSequenceClassification, BertTokenizer
-from peft import peft_model, LoraConfig # type: ignore
+from peft import peft_model
 from config import Config
 from pprint import pprint
 from dotenv import load_dotenv

@@ -8,6 +8,7 @@ class Config:
     RANDOM_STATE=42
     MODEL_PATH="nlptown/bert-base-multilingual-uncased-sentiment"
     NUM_LABELS=28
+    PROJECT_NAME="sst_with_bert"
     
     @classmethod
     def device(cls):
