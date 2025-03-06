@@ -150,7 +150,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-r", "--resume", type="str", default=None, help="resume checkpoint uri"
+        "-r", "--resume", type=str, default=None, help="resume checkpoint uri"
     )
     parser.add_argument("-u", "--upload", action="store_true", help="Enable uploads")
     args = parser.parse_args()
