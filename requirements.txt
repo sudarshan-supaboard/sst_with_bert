@@ -9,4 +9,4 @@ dotenv
 google-cloud-storage
 argparse
 gputil
-
+peft
