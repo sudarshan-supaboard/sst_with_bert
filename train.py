@@ -49,12 +49,6 @@ class CustomTrainer(Trainer):
         self, model, inputs, return_outputs=False, num_items_in_batch=None
     ):
 
-        device = "cpu"
-
-        if isinstance(model, torch.nn.DataParallel):
-            device = model.module.device
-
-        inputs = {k: v.to(device) for k, v in inputs.items()}
         labels = inputs.pop("labels")
 
         # Forward pass
