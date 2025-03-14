@@ -7,6 +7,7 @@ from pprint import pprint
 
 from config import Config
 # Download latest version
+
 path = kagglehub.dataset_download(Config.DATASET_PATH)
 
 print("Path to dataset files:", path)
@@ -16,6 +17,7 @@ emotions = ds_path / 'emotions.txt'
 train_path = ds_path / 'train.csv'
 test_path = ds_path / 'test.csv'
 valid_path = ds_path / 'val.csv'
+    
 
 def get_label_dict():
     with open(emotions) as f:
@@ -33,15 +35,18 @@ def get_label_dict():
     
     return idx_to_labels , labels_to_idx
 
+
 idx_to_labels, labels_to_idx = get_label_dict()
 
-
 def make_datasets():
+    
     
     train_df = pd.read_csv(train_path)
     test_df = pd.read_csv(test_path)
     valid_df = pd.read_csv(valid_path)
-
+    
+    
+    
     # shuffle the train_df
     train_df = train_df.sample(frac=1, ignore_index=True, random_state=Config.RANDOM_STATE)
     test_df = test_df.sample(frac = 1, ignore_index=True, random_state=Config.RANDOM_STATE)

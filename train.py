@@ -5,14 +5,19 @@ import evaluate
 import json
 import argparse
 import wandb
+import os
 
 from transformers import Trainer
 from transformers import Trainer, TrainingArguments
 
 from pprint import pprint
-from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback, get_memory_usage
-from model import model, tokenized_datasets
+from utils import EarlyStoppingTrainingLossCallback, GCSUploadCallback
+from model import get_model, tokenize
 from config import Config
+from dotenv import load_dotenv
+
+from huggingface_hub import login as hf_login
+from wandb import login as wandb_login
 
 # Load multiple metrics
 accuracy = evaluate.load("accuracy")
@@ -20,6 +25,14 @@ f1 = evaluate.load("f1")
 
 wandb.init(project=Config.PROJECT_NAME)
 
+load_dotenv()
+
+hf_key = os.environ['HUGGING_FACE_API_KEY']
+wandb_key = os.environ['WANDB_API_KEY']
+
+
+hf_login(token=hf_key)
+wandb_login(key=wandb_key)
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -56,17 +69,19 @@ class CustomTrainer(Trainer):
 
 
 def train(
-    bkt_upload=True,
-    num_epochs=3,
-    resume_checkpoint=None,
-    train_batch=8,
-    eval_batch=64,
-    grad_steps=4,
-    log_steps=10,
-    save_steps=300,
-    eval_steps=300,
+    model,
+    bkt_upload,
+    num_epochs,
+    resume_checkpoint,
+    train_batch,
+    eval_batch,
+    grad_steps,
+    log_steps,
+    save_steps,
+    eval_steps,
 ):
 
+    model, tokenizer = get_model(model_name=model)
     # Create TrainingArguments
     training_args = TrainingArguments(
         run_name=Config.PROJECT_NAME,
@@ -89,12 +104,15 @@ def train(
         metric_for_best_model="f1",
         greater_is_better=True,
         report_to="wandb",
-        bf16=True,
+        fp16=True,
+        ddp_find_unused_parameters=False,
+        ddp_backend='nccl'
     )
 
     es_callback = EarlyStoppingTrainingLossCallback(patience=3)
-    gcs_callback = GCSUploadCallback(bkt_upload=bkt_upload)
+    gcs_callback = GCSUploadCallback(bucket_name=Config.BUCKET_NAME, checkpoint_dir=Config.OUTPUT_DIR, bkt_upload=bkt_upload)
 
+    tokenized_datasets = tokenize(tokenizer)
     # Create Trainer instance
     trainer = CustomTrainer(
         model=model,  # The instantiated 🤗 Transformers model to be trained
@@ -153,6 +171,7 @@ if __name__ == "__main__":
         "-r", "--resume", type=str, default=None, help="resume checkpoint uri"
     )
     parser.add_argument("-u", "--upload", action="store_true", help="Enable uploads")
+    parser.add_argument("-m", "--model", type=str, choices=['bert', 'roberta'], default='bert')
     args = parser.parse_args()
 
     bkt_upload = False
@@ -162,7 +181,9 @@ if __name__ == "__main__":
     else:
         print(f"bucket upload disabled")
 
+    pprint(args)
     train(
+        model=args.model,
         bkt_upload=bkt_upload,
         num_epochs=args.epochs,
         resume_checkpoint=args.resume,
