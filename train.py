@@ -98,7 +98,7 @@ def train(
         metric_for_best_model="f1",
         greater_is_better=True,
         report_to="wandb",
-        fp16=True,
+        bf16=True,
         ddp_find_unused_parameters=False,
         ddp_backend='nccl'
     )

@@ -25,7 +25,7 @@ def get_model(model_name: str):
             problem_type="multi_label_classification",
             ignore_mismatched_sizes=True,
             num_labels=Config.NUM_LABELS,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.bfloat16,
         )
     elif model_name == "roberta":
         Config.set_roberta_model()
@@ -38,7 +38,7 @@ def get_model(model_name: str):
             problem_type="multi_label_classification",
             ignore_mismatched_sizes=True,
             num_labels=Config.NUM_LABELS,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.bfloat16,
         )
 
     else:
