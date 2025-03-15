@@ -73,6 +73,7 @@ def train(
     log_steps,
     save_steps,
     eval_steps,
+    warmup_ratio
 ):
 
     model, tokenizer = get_model(model_name=model)
@@ -84,7 +85,7 @@ def train(
         per_device_train_batch_size=train_batch,  # batch size per device during training
         gradient_accumulation_steps=grad_steps,
         per_device_eval_batch_size=eval_batch,  # Batch size for evaluation
-        warmup_ratio=0.1,  # Number of warmup steps for learning rate scheduler
+        warmup_ratio=warmup_ratio,  # Number of warmup steps for learning rate scheduler
         learning_rate=5e-5,
         weight_decay=0.01,  # Strength of weight decay
         logging_dir="./logs",  # Directory for storing logs
@@ -166,6 +167,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-u", "--upload", action="store_true", help="Enable uploads")
     parser.add_argument("-m", "--model", type=str, choices=['bert', 'roberta'], default='bert')
+    parser.add_argument("-wr", "--warmup_ratio", type=float, default=0.3)
     args = parser.parse_args()
 
     bkt_upload = False
@@ -187,4 +189,5 @@ if __name__ == "__main__":
         log_steps=args.log_steps,
         save_steps=args.save_steps,
         eval_steps=args.eval_steps,
+        warmup_ratio=args.warmup_ratio
     )
