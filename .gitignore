@@ -10,6 +10,8 @@ results
 checkpoints
 bert_checkpoints
 roberta_checkpoints
+bert_checkpoints_cls
+roberta_checkpoints_cls
 
 test.py
 test.ipynb

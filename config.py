@@ -17,9 +17,9 @@ class Config:
     @classmethod
     def set_roberta_model(cls):
         cls.MODEL_PATH  = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-        cls.OUTPUT_DIR = "roberta_checkpoints"
+        cls.OUTPUT_DIR = "roberta_checkpoints_cls"
     
     @classmethod
     def set_bert_model(cls):
         cls.MODEL_PATH = "nlptown/bert-base-multilingual-uncased-sentiment"
-        cls.OUTPUT_DIR = "bert_checkpoints"
+        cls.OUTPUT_DIR = "bert_checkpoints_cls"
